@@ -4,3 +4,5 @@
 # GlowFly API
 
 This repository contains the C++ API to use the **GlowFly** light system in custom applications. It also contains a binding file for C#.
+
+Head over to the Github Actions to get compiled dlls.
