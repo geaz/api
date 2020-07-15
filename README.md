@@ -1,4 +1,4 @@
-[![GPL](https://img.shields.io/github/license/glowfly/glowfly_api)](https://github.com/glowfly/glowfly_api/blob/master/LICENSE)   
+[![GPL](https://img.shields.io/github/license/glowfly/glowfly_api)](https://github.com/glowfly/glowfly_api/blob/master/LICENSE) ![CIBuild](https://github.com/glowfly/glowfly_api/workflows/CIBuild/badge.svg)  
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A01MQZP)
 
 # GlowFly API
