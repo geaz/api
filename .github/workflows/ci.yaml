@@ -1,0 +1,17 @@
+name: CIBuild
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build GlowFly API
+        uses: ashutoshvarma/action-cmake-build@v1
+        with:
+          build-dir: ./build
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: "glowfly-api-win64"
+          path: ./build
