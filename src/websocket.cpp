@@ -22,6 +22,11 @@ namespace GlowFly
             _socket.start();
         }
 
+        void Websocket::stop()
+        {
+            _socket.start();
+        }
+
         void Websocket::send(Server::Command command)
         {
             size_t commandSize = sizeof(command);

@@ -22,6 +22,7 @@ namespace GlowFly
                 Websocket(const std::string url);
 
                 void start();
+                void stop();
                 void send(Server::Command command);
 
                 EventRegistration<ConnectionEvent> connectionEvents;
