@@ -1,0 +1,7 @@
+include(FetchContent)
+FetchContent_Declare(
+    glowflyapiarduino
+    GIT_REPOSITORY https://github.com/glowfly/glowfly_api_arduino
+    GIT_TAG 3d0a616701ec3706be909a70c0e5d8453fe761ab
+)
+FetchContent_Populate(glowflyapiarduino)
