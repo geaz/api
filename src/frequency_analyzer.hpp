@@ -1,13 +1,13 @@
-#ifndef FREQUENCYANALYZER_H
-#define FREQUENCYANALYZER_H
+#ifndef CFREQUENCYANALYZER_H
+#define CFREQUENCYANALYZER_H
 
 #include <chrono>
 #include <array>
 #include <functional>
 #include <RtAudio.h>
 #include <kiss_fft.h>
+#include <mappings.hpp>
 #include <band_pass_filter.hpp>
-#include <shared_funcs.hpp>
 #include <frequency_infos.hpp>
 #include <event_registration.hpp>
 
@@ -15,11 +15,10 @@ namespace GlowFly
 {
     namespace Api
     {
-        typedef std::function<void(float, uint8_t, uint16_t, std::array<uint8_t, BAR_COUNT>)> FrequencyEvent;
+        typedef std::function<void(AnalyzerCommand)> FrequencyEvent;
 
         static const float EfAlpha = 0.4f;
         static const int8_t MinDB = -50;
-        static const unsigned int HalfFFTDataSize = GlowFly::FFTDataSize / 2;
 
         class FrequencyAnalyzer
         {
@@ -33,7 +32,7 @@ namespace GlowFly
                 std::array<float, HalfFFTDataSize> calculateAmplitudes(const kiss_fft_cpx* cx) const;
                 uint16_t getDominantFrequency(std::array<float, HalfFFTDataSize> amplitudes);
                 
-                static int streamCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, 
+                static int getAnalyzerResult(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, 
                     double streamTime, RtAudioStreamStatus status, void *userData);
 
                 RtAudio _adc = RtAudio(RtAudio::Api::WINDOWS_WASAPI);
@@ -46,4 +45,4 @@ namespace GlowFly
     }
 }
 
-#endif // FREQUENCYANALYZER_H
+#endif // CFREQUENCYANALYZER_H

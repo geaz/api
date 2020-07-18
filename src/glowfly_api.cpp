@@ -12,8 +12,7 @@ namespace GlowFly
             websocket.connectionEvents.addEventHandler(
                 [this](bool connected) { onConnection(connected); });
             _freqAnalyzer.frequencyEvents.addEventHandler(
-                [this](const float decibel, const uint8_t volume, uint16_t dominantFrequency, std::array<uint8_t, BAR_COUNT> buckets) 
-                { onFrequencyCalculated(decibel, volume, dominantFrequency, buckets); });
+                [this](AnalyzerCommand command) { onFrequencyCalculated(command); });
         }
 
         void GlowFlyApi::start()
@@ -57,13 +56,12 @@ namespace GlowFly
             }
         }
 
-        void GlowFlyApi::onFrequencyCalculated(const float decibel, const uint8_t volume, const uint16_t dominantFrequency, const std::array<uint8_t, BAR_COUNT> buckets)
+        void GlowFlyApi::onFrequencyCalculated(AnalyzerCommand command)
         {
             if(_currentSource != AnalyzerSource::Desktop) return;
 
             Server::Command serverCommand = { 0, Server::CommandType::EXTERNAL_ANALYZER };
-            Server::ExternalAnalyzerCommand analyzerCommand = { decibel, volume, dominantFrequency, buckets };
-            serverCommand.externalAnalyzerCommand = analyzerCommand;
+            serverCommand.analyzerCommand = command;
 
             websocket.send(serverCommand); 
         }

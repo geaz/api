@@ -1,4 +1,5 @@
 #include <cmath>
+#include <analyzer_result.hpp>
 #include "frequency_analyzer.hpp"
 
 namespace GlowFly
@@ -23,7 +24,7 @@ namespace GlowFly
                     _parameters.firstChannel = 0;
                     
                     _adc.openStream(nullptr, &_parameters, RTAUDIO_FLOAT32, GlowFly::SampleRate, &bufferFrames, 
-                        &FrequencyAnalyzer::streamCallback, (void *)this);
+                        &FrequencyAnalyzer::getAnalyzerResult, (void *)this);
                 }
                 _adc.startStream();
                 started = true;
@@ -73,7 +74,7 @@ namespace GlowFly
             return (uint16_t)dominantFrequency;
         }
 
-        /* static */ int FrequencyAnalyzer::streamCallback(void *outputBuffer, void *inputBuffer, 
+        /* static */ int FrequencyAnalyzer::getAnalyzerResult(void *outputBuffer, void *inputBuffer, 
             unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status, void *userData)
         {
             FrequencyAnalyzer* freqAnalyzer = (FrequencyAnalyzer*)userData;
@@ -81,6 +82,9 @@ namespace GlowFly
             auto now = std::chrono::system_clock::now();
             auto elapsed = now - freqAnalyzer->_lastUpdate;
             auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+
+            // We want to avoid flodding the mesh and network
+            // Just do updates every 50ms
             if(milliseconds >= 50)
             {
                 kiss_fft_cpx cx_in[FFTDataSize], cx_out[FFTDataSize];       
@@ -111,17 +115,13 @@ namespace GlowFly
                 kiss_fft(cfg, cx_in, cx_out);
                 kiss_fft_free(cfg);
 
-                float signalRMSflt = sqrtf(signalRMS / FFTDataSize);
-                float decibel = 20.0f * log10(signalRMSflt);
-                uint8_t volume = (uint8_t) GlowFly::mapf(decibel < MinDB ? MinDB : decibel, MinDB, 0, 0, 100);
+                AnalyzerResult result;
+                result.decibel = 20.0f * log10(sqrtf(signalRMS / FFTDataSize));
+                result.volume = (uint8_t) GlowFly::mapf(result.decibel < MinDB ? MinDB : result.decibel, MinDB, 0, 0, 100);
+                result.amplitudes = freqAnalyzer->calculateAmplitudes(&cx_out[0]);
+                result.dominantFrequency = freqAnalyzer->getDominantFrequency(result.amplitudes);
 
-                std::array<float, HalfFFTDataSize> amplitudes = freqAnalyzer->calculateAmplitudes(&cx_out[0]);
-                uint16_t dominantFrequency = freqAnalyzer->getDominantFrequency(amplitudes);
-                std::array<uint8_t, BAR_COUNT> frequencyBars = GlowFly::getFrequencyBars(amplitudes.data(), volume);
-
-                for(auto event : freqAnalyzer->frequencyEvents.getEventHandlers())
-                    event.second(decibel, volume, dominantFrequency, frequencyBars);
-                
+                for(auto event : freqAnalyzer->frequencyEvents.getEventHandlers()) event.second(result.ToCommand());                
                 freqAnalyzer->_lastUpdate = std::chrono::system_clock::now();
             }   
             return 0;

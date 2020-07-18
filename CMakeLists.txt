@@ -25,8 +25,8 @@ target_link_libraries(glowflyapi
     rtaudio)
 target_include_directories(glowflyapi PRIVATE 
     ${glowflyapiarduino_SOURCE_DIR}/src
+    ${glowflyapiarduino_SOURCE_DIR}/src/visualization
     ${glowflyapiarduino_SOURCE_DIR}/src/network/websocket/commands)
-target_compile_definitions(glowflyapi PRIVATE BAR_COUNT=17 BAR_HEIGHT=8)
 
 # Necessary for ixWebsocket
 if(WIN32)

@@ -22,12 +22,12 @@ namespace GlowFly
             private:
                 void onConnection(const bool connected);
                 void onCommandReceived(const Client::Command command);
-                void onFrequencyCalculated(const float decibel, const uint8_t volume, const uint16_t dominantFrequency, const std::array<uint8_t, BAR_COUNT> buckets);
+                void onFrequencyCalculated(AnalyzerCommand command);
                 Server::Command createAnswer(const Client::Command command, const Server::CommandType answerCommandType) const;
 
                 AnalyzerSource _apiSource;
                 FrequencyAnalyzer _freqAnalyzer;
-                AnalyzerSource _currentSource = AnalyzerSource::Basis;
+                AnalyzerSource _currentSource = AnalyzerSource::Base;
         };
     }
 }
@@ -61,7 +61,7 @@ extern "C" {
                 switch(command.commandType)
                 {
                     case GlowFly::Client::CommandType::ANALYZER_UPDATE:
-                        GlowFly::Client::AnalyzerCommand analyzerCommand = command.analyzerCommand;
+                        GlowFly::AnalyzerCommand analyzerCommand = command.analyzerCommand;
                         fn(analyzerCommand.volume, analyzerCommand.frequency);
                         break;
                 }
