@@ -6,6 +6,7 @@ set(ixWebsocket_LIBRARY_DIR "${CMAKE_BINARY_DIR}/libs/ixwebsocket/lib/")
 EXTERNALPROJECT_ADD(
     ext_ixws
     GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
+    GIT_TAG ffde283a4b999adb611a4cf22e4347b9dba28785
     CMAKE_ARGS 
         "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/libs/ixwebsocket"
         "-DZLIB_LIBRARY=${zLib_LIBRARY_DIR}"
