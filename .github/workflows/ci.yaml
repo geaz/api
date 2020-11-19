@@ -6,12 +6,20 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build syncBlink API
-        uses: ashutoshvarma/action-cmake-build@v1
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.4
         with:
-          build-dir: ./build
+          cmake-version: '3.16.x'
+      - name: Create build dir
+        run: mkdir build
+      - name: Config cmake
+        working-directory: ./build
+        run: cmake ..
+      - name: Build API
+        working-directory: ./build
+        run: cmake --build .
       - name: Upload artifact
         uses: actions/upload-artifact@v1.0.0
         with:
           name: "syncblink-api-win64"
-          path: ./build
+          path: ./build/Debug
