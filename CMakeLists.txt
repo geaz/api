@@ -6,7 +6,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists-kissfft.txt)
 include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists-rtAudio.txt)
 include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists-zLib.txt)
 include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists-ixWebsocket.txt)
-include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists-SyncBlinkApiArduino)
+include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists-SyncBlinkApiArduino.txt)
     
 file(GLOB_RECURSE SYNCBLINKDESKTOP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
@@ -20,9 +20,9 @@ add_dependencies(syncblinkapi
     ext_rtaudio)
 target_link_libraries(syncblinkapi
     kissfft
-    zlibstatic
+    zlibstaticd
     ixwebsocket
-    rtaudio)
+    rtaudiod)
 target_include_directories(syncblinkapi PRIVATE 
     ${syncblinkapiarduino_SOURCE_DIR}/src
     ${syncblinkapiarduino_SOURCE_DIR}/src/visualization
