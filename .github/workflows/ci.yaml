@@ -6,17 +6,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Run vcpkg
-        uses: lukka/run-vcpkg@v4
-        with:
-          # Response file stored in source control, it provides the list of ports and triplet(s).
-          vcpkgArguments: '@${{ env.vcpkgResponseFile }}'
-          # Location of the vcpkg as submodule of the repository.
-          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
       - name: Build syncBlink API
         uses: lukka/run-cmake@v3
         with:
-          useVcpkgToolchainFile: true
           buildDirectory: ./build
           cmakeAppendedArgs: '-GNinja '
       - name: Upload artifact
