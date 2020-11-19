@@ -7,9 +7,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build syncBlink API
-        uses: ashutoshvarma/action-cmake-build@v1
+        uses: lukka/run-cmake@v3
         with:
-          build-dir: ./build
+          buildDirectory: ./build
       - name: Upload artifact
         uses: actions/upload-artifact@v1.0.0
         with:
