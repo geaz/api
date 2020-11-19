@@ -11,7 +11,7 @@
 #include <frequency_infos.hpp>
 #include <event_registration.hpp>
 
-namespace GlowFly
+namespace SyncBlink
 {
     namespace Api
     {

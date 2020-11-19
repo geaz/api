@@ -1,0 +1,7 @@
+include(FetchContent)
+FetchContent_Declare(
+    syncblinkapiarduino
+    GIT_REPOSITORY https://github.com/syncBlink/api_arduino
+    GIT_TAG 10a0df4b93c7725d077b4dfbe99de1b88b927e29
+)
+FetchContent_Populate(syncblinkapiarduino)

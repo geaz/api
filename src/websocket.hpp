@@ -1,5 +1,5 @@
-#ifndef GLOWFLYDESKTOPWEBSOCKET_H
-#define GLOWFLYDESKTOPWEBSOCKET_H
+#ifndef SYNCBLINKDESKTOPWEBSOCKET_H
+#define SYNCBLINKDESKTOPWEBSOCKET_H
 
 #include <vector>
 #include <functional>
@@ -9,7 +9,7 @@
 #include <server_commands.hpp>
 #include <event_registration.hpp>
 
-namespace GlowFly
+namespace SyncBlink
 {
     namespace Api
     {
@@ -37,4 +37,4 @@ namespace GlowFly
     }
 }
 
-#endif // GLOWFLYDESKTOPWEBSOCKET_H
+#endif // SYNCBLINKDESKTOPWEBSOCKET_H

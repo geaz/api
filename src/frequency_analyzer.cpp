@@ -2,7 +2,7 @@
 #include <analyzer_result.hpp>
 #include "frequency_analyzer.hpp"
 
-namespace GlowFly
+namespace SyncBlink
 {
     namespace Api
     {
@@ -15,7 +15,7 @@ namespace GlowFly
             {
                 if(!_adc.isStreamOpen())
                 {                    
-                    unsigned int bufferFrames = GlowFly::FFTDataSize;
+                    unsigned int bufferFrames = SyncBlink::FFTDataSize;
                     uint32_t deviceId = _adc.getDefaultOutputDevice();
                     RtAudio::DeviceInfo deviceInfo = _adc.getDeviceInfo(deviceId);
 
@@ -23,7 +23,7 @@ namespace GlowFly
                     _parameters.nChannels = deviceInfo.outputChannels;
                     _parameters.firstChannel = 0;
                     
-                    _adc.openStream(nullptr, &_parameters, RTAUDIO_FLOAT32, GlowFly::SampleRate, &bufferFrames, 
+                    _adc.openStream(nullptr, &_parameters, RTAUDIO_FLOAT32, SyncBlink::SampleRate, &bufferFrames, 
                         &FrequencyAnalyzer::getAnalyzerResult, (void *)this);
                 }
                 _adc.startStream();
@@ -117,7 +117,7 @@ namespace GlowFly
 
                 AnalyzerResult result;
                 result.decibel = 20.0f * log10(sqrtf(signalRMS / FFTDataSize));
-                result.volume = (uint8_t) GlowFly::mapf(result.decibel < MinDB ? MinDB : result.decibel, MinDB, 0, 0, 100);
+                result.volume = (uint8_t) SyncBlink::mapf(result.decibel < MinDB ? MinDB : result.decibel, MinDB, 0, 0, 100);
                 result.amplitudes = freqAnalyzer->calculateAmplitudes(&cx_out[0]);
                 result.dominantFrequency = freqAnalyzer->getDominantFrequency(result.amplitudes);
 

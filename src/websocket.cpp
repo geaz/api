@@ -5,7 +5,7 @@
 
 #include "websocket.hpp"
 
-namespace GlowFly
+namespace SyncBlink
 {
     namespace Api
     {
@@ -47,7 +47,7 @@ namespace GlowFly
             {
                 if(msg->binary)
                 {
-                    GlowFly::Client::Command receivedCommand;
+                    SyncBlink::Client::Command receivedCommand;
                     memcpy(&receivedCommand, &msg->str.c_str()[0], msg->str.length());
                     for(auto event : commandEvents.getEventHandlers()) event.second(receivedCommand);
                 }
