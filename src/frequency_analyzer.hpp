@@ -15,7 +15,7 @@ namespace SyncBlink
 {
     namespace Api
     {
-        typedef std::function<void(AnalyzerCommand)> FrequencyEvent;
+        typedef std::function<void(AudioAnalyzerMessage)> FrequencyEvent;
 
         static const float EfAlpha = 0.4f;
         static const int8_t MinDB = -50;

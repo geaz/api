@@ -25,8 +25,8 @@ target_link_libraries(syncblinkapi
     rtaudiod)
 target_include_directories(syncblinkapi PRIVATE 
     ${syncblinkapiarduino_SOURCE_DIR}/src
-    ${syncblinkapiarduino_SOURCE_DIR}/src/visualization
-    ${syncblinkapiarduino_SOURCE_DIR}/src/network/websocket/commands)
+    ${syncblinkapiarduino_SOURCE_DIR}/src/audio
+    ${syncblinkapiarduino_SOURCE_DIR}/src/network/websocket/messages)
 
 # Necessary for ixWebsocket
 if(WIN32)

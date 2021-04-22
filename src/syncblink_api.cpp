@@ -5,14 +5,14 @@ namespace SyncBlink
 {
     namespace Api
     {
-        SyncBlinkApi::SyncBlinkApi(std::string url, AnalyzerSource source) : websocket(url), _apiSource(source)
+        SyncBlinkApi::SyncBlinkApi(std::string url, AudioAnalyzerSource source) : websocket(url), _apiSource(source)
         { 
-            websocket.commandEvents.addEventHandler(
-                [this](SyncBlink::Client::Command command) { onCommandReceived(command); });
+            websocket.messageEvents.addEventHandler(
+                [this](SyncBlink::Server::Message message) { onMessageReceived(message); });
             websocket.connectionEvents.addEventHandler(
                 [this](bool connected) { onConnection(connected); });
             _freqAnalyzer.frequencyEvents.addEventHandler(
-                [this](AnalyzerCommand command) { onFrequencyCalculated(command); });
+                [this](AudioAnalyzerMessage message) { onFrequencyCalculated(message); });
         }
 
         void SyncBlinkApi::start()
@@ -32,49 +32,41 @@ namespace SyncBlink
             else _freqAnalyzer.stop();
         }
 
-        void SyncBlinkApi::onCommandReceived(const Client::Command command)
+        void SyncBlinkApi::onMessageReceived(const Server::Message message)
         {
-            switch(command.commandType)
+            switch(message.messageType)
             {
-                case SyncBlink::Client::CommandType::MESH_COUNT_REQUEST:
-                    std::cout << "MESH COUNT REQUEST\n";
-                    websocket.send(createAnswer(command, SyncBlink::Server::CommandType::MESH_COUNTED));
+                case Server::MESH_COUNT_REQUEST:
+                    websocket.send(createAnswer(message, Client::MESH_COUNTED));
                     break;
-                case SyncBlink::Client::CommandType::MESH_UPDATE:
-                    std::cout << "MESH UPDATE\n";
-                    websocket.send(createAnswer(command, SyncBlink::Server::CommandType::MESH_UPDATED));
+                case Server::MESH_UPDATE:
+                    websocket.send(createAnswer(message, Client::MESH_UPDATED));
                     break;
-                case Client::CommandType::SOURCE_UPDATE:
-                    std::cout << "SOURCE UPDATE\n";
-                    _currentSource = command.sourceCommand.source;
-                    break;
-                case Client::CommandType::MOD_REMOVED:
-                    std::cout << "MOD REMOVED\n";
-                    break;
-                case Client::CommandType::ANALYZER_UPDATE:
+                case Server::SOURCE_UPDATE:
+                    _currentSource = message.sourceMessage.source;
                     break;
             }
         }
 
-        void SyncBlinkApi::onFrequencyCalculated(AnalyzerCommand command)
+        void SyncBlinkApi::onFrequencyCalculated(AudioAnalyzerMessage analyzerMessage)
         {
-            if(_currentSource != AnalyzerSource::Desktop) return;
+            if(_currentSource != AudioAnalyzerSource::Desktop) return;
 
-            Server::Command serverCommand = { 0, Server::CommandType::EXTERNAL_ANALYZER };
-            serverCommand.analyzerCommand = command;
+            Client::Message message = { 0, Client::EXTERNAL_ANALYZER };
+            message.audioAnalyzerMessage = analyzerMessage;
 
-            websocket.send(serverCommand); 
+            websocket.send(message); 
         }
 
-        Server::Command SyncBlinkApi::createAnswer(const Client::Command command, const Server::CommandType answerCommandType) const
+        Client::Message SyncBlinkApi::createAnswer(const Server::Message message, const Client::MessageType answerMessageType) const
         {
-            Server::Command answerCommand = { command.id, answerCommandType };
-            if(answerCommandType == SyncBlink::Server::MESH_COUNTED)
+            Client::Message answerMessage = { message.id, answerMessageType };
+            if(answerMessageType == Client::MESH_COUNTED)
             {
-                Server::CountedCommand counted = { command.countCommand.meshLedCount };
-                answerCommand.countedCommand = counted;
+                Client::CountedMessage counted = { message.countMessage.meshLedCount };
+                answerMessage.countedMessage = counted;
             }
-            return answerCommand;
+            return answerMessage;
         }
     }
 }

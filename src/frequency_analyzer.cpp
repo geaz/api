@@ -1,5 +1,5 @@
 #include <cmath>
-#include <analyzer_result.hpp>
+#include <audio_analyzer_result.hpp>
 #include "frequency_analyzer.hpp"
 
 namespace SyncBlink
@@ -115,13 +115,13 @@ namespace SyncBlink
                 kiss_fft(cfg, cx_in, cx_out);
                 kiss_fft_free(cfg);
 
-                AnalyzerResult result;
+                AudioAnalyzerResult result;
                 result.decibel = 20.0f * log10(sqrtf(signalRMS / FFTDataSize));
                 result.volume = (uint8_t) SyncBlink::mapf(result.decibel < MinDB ? MinDB : result.decibel, MinDB, 0, 0, 100);
                 result.amplitudes = freqAnalyzer->calculateAmplitudes(&cx_out[0]);
                 result.dominantFrequency = freqAnalyzer->getDominantFrequency(result.amplitudes);
 
-                for(auto event : freqAnalyzer->frequencyEvents.getEventHandlers()) event.second(result.ToCommand());                
+                for(auto event : freqAnalyzer->frequencyEvents.getEventHandlers()) event.second(result.ToMessage());                
                 freqAnalyzer->_lastUpdate = std::chrono::system_clock::now();
             }   
             return 0;

@@ -2,7 +2,7 @@
 #define SYNCBLINKAPI_H
 
 #include <event_registration.hpp>
-#include <client_commands.hpp>
+#include <server_messages.hpp>
 #include "websocket.hpp"
 #include "frequency_analyzer.hpp"
 
@@ -13,7 +13,7 @@ namespace SyncBlink
         class SyncBlinkApi
         {
             public:
-                SyncBlinkApi(std::string url, AnalyzerSource source);
+                SyncBlinkApi(std::string url, AudioAnalyzerSource source);
                 void start();
                 void stop();
 
@@ -21,13 +21,13 @@ namespace SyncBlink
 
             private:
                 void onConnection(const bool connected);
-                void onCommandReceived(const Client::Command command);
-                void onFrequencyCalculated(AnalyzerCommand command);
-                Server::Command createAnswer(const Client::Command command, const Server::CommandType answerCommandType) const;
+                void onMessageReceived(const Server::Message message);
+                void onFrequencyCalculated(AudioAnalyzerMessage message);
+                Client::Message createAnswer(const Server::Message message, const Client::MessageType answerMessageType) const;
 
-                AnalyzerSource _apiSource;
+                AudioAnalyzerSource _apiSource;
                 FrequencyAnalyzer _freqAnalyzer;
-                AnalyzerSource _currentSource = AnalyzerSource::Base;
+                AudioAnalyzerSource _currentSource = AudioAnalyzerSource::Station;
         };
     }
 }
@@ -37,7 +37,7 @@ extern "C" {
 
     __declspec(dllexport) syncblink_api syncblink_api_init(const char *url, int source)
     {
-        return new SyncBlink::Api::SyncBlinkApi(url, static_cast<SyncBlink::AnalyzerSource>(source));
+        return new SyncBlink::Api::SyncBlinkApi(url, static_cast<SyncBlink::AudioAnalyzerSource>(source));
     }
 
     __declspec(dllexport) void syncblink_api_start(syncblink_api g)
@@ -55,14 +55,14 @@ extern "C" {
         void (*fn)(uint8_t volume, uint16_t dominant_frequency))
     {
         static_cast<SyncBlink::Api::SyncBlinkApi*>(g)->websocket
-            .commandEvents
-            .addEventHandler([=](SyncBlink::Client::Command command)
+            .messageEvents
+            .addEventHandler([=](SyncBlink::Server::Message message)
             {
-                switch(command.commandType)
+                switch(message.messageType)
                 {
-                    case SyncBlink::Client::CommandType::ANALYZER_UPDATE:
-                        SyncBlink::AnalyzerCommand analyzerCommand = command.analyzerCommand;
-                        fn(analyzerCommand.volume, analyzerCommand.frequency);
+                    case SyncBlink::Server::MessageType::ANALYZER_UPDATE:
+                        SyncBlink::AudioAnalyzerMessage analyzerMessage = message.analyzerMessage;
+                        fn(analyzerMessage.volume, analyzerMessage.frequency);
                         break;
                 }
             });

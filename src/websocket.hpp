@@ -5,15 +5,15 @@
 #include <functional>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
-#include <client_commands.hpp>
-#include <server_commands.hpp>
+#include <client_messages.hpp>
+#include <server_messages.hpp>
 #include <event_registration.hpp>
 
 namespace SyncBlink
 {
     namespace Api
     {
-        typedef std::function<void(Client::Command)> CommandReceivedEvent;
+        typedef std::function<void(Server::Message)> MessageReceivedEvent;
         typedef std::function<void(bool)> ConnectionEvent;
 
         class Websocket
@@ -23,10 +23,10 @@ namespace SyncBlink
 
                 void start();
                 void stop();
-                void send(Server::Command command);
+                void send(Client::Message message);
 
                 EventRegistration<ConnectionEvent> connectionEvents;
-                EventRegistration<CommandReceivedEvent> commandEvents;
+                EventRegistration<MessageReceivedEvent> messageEvents;
 
             private:
                 void onMessage(const ix::WebSocketMessagePtr& msg);

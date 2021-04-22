@@ -1,7 +1,5 @@
 #include <iostream>
 #include <inttypes.h>
-#include <client_commands.hpp>
-#include <server_commands.hpp>
 
 #include "websocket.hpp"
 
@@ -27,14 +25,14 @@ namespace SyncBlink
             _socket.start();
         }
 
-        void Websocket::send(Server::Command command)
+        void Websocket::send(Client::Message message)
         {
-            size_t commandSize = sizeof(command);
-            std::vector<uint8_t> serializedCommand;
-            serializedCommand.resize(sizeof(command));
-            memcpy(&serializedCommand[0], &command, commandSize);                                 
+            size_t messageSize = sizeof(message);
+            std::vector<uint8_t> serializedMessage;
+            serializedMessage.resize(sizeof(message));
+            memcpy(&serializedMessage[0], &message, messageSize);                                 
 
-            _socket.sendBinary(std::string(serializedCommand.begin(), serializedCommand.end()));
+            _socket.sendBinary(std::string(serializedMessage.begin(), serializedMessage.end()));
         }
 
         void Websocket::onMessage(const ix::WebSocketMessagePtr& msg)
@@ -47,11 +45,11 @@ namespace SyncBlink
             {
                 if(msg->binary)
                 {
-                    SyncBlink::Client::Command receivedCommand;
-                    memcpy(&receivedCommand, &msg->str.c_str()[0], msg->str.length());
-                    for(auto event : commandEvents.getEventHandlers()) event.second(receivedCommand);
+                    Server::Message receivedMessage;
+                    memcpy(&receivedMessage, &msg->str.c_str()[0], msg->str.length());
+                    for(auto event : messageEvents.getEventHandlers()) event.second(receivedMessage);
                 }
-                else send({ 0, Server::MOD_DISTRIBUTED });
+                else send({ 0, Client::MOD_DISTRIBUTED });
             }
         }
     }
