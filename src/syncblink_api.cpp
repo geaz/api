@@ -52,7 +52,7 @@ namespace SyncBlink
         {
             if(_currentSource != AudioAnalyzerSource::Desktop) return;
 
-            Client::Message message = { 0, Client::EXTERNAL_ANALYZER };
+            Client::Message message = { 666, Client::EXTERNAL_ANALYZER };
             message.audioAnalyzerMessage = analyzerMessage;
 
             websocket.send(message); 
@@ -61,11 +61,7 @@ namespace SyncBlink
         Client::Message SyncBlinkApi::createAnswer(const Server::Message message, const Client::MessageType answerMessageType) const
         {
             Client::Message answerMessage = { message.id, answerMessageType };
-            if(answerMessageType == Client::MESH_COUNTED)
-            {
-                Client::CountedMessage counted = { message.countMessage.meshLedCount };
-                answerMessage.countedMessage = counted;
-            }
+            if(answerMessageType == Client::MESH_COUNTED) answerMessage.countedMessage = {0,0,0,0};
             return answerMessage;
         }
     }
