@@ -3,7 +3,7 @@
 
 #include <event_registration.hpp>
 #include <server_messages.hpp>
-#include "websocket.hpp"
+#include "tcp_client.hpp"
 #include "frequency_analyzer.hpp"
 
 namespace SyncBlink
@@ -17,13 +17,11 @@ namespace SyncBlink
                 void start();
                 void stop();
 
-                Websocket websocket;
+                TcpClient _tcpClient;
 
             private:
-                void onConnection(const bool connected);
-                void onMessageReceived(const Server::Message message);
+                void onMessageReceived(Server::MessageType messageType, std::vector<uint8_t> payload);
                 void onFrequencyCalculated(AudioAnalyzerMessage message);
-                Client::Message createAnswer(const Server::Message message, const Client::MessageType answerMessageType) const;
 
                 AudioAnalyzerSource _apiSource;
                 FrequencyAnalyzer _freqAnalyzer;
@@ -54,16 +52,15 @@ extern "C" {
         syncblink_api g,
         void (*fn)(uint8_t volume, uint16_t dominant_frequency))
     {
-        static_cast<SyncBlink::Api::SyncBlinkApi*>(g)->websocket
+        static_cast<SyncBlink::Api::SyncBlinkApi*>(g)->_tcpClient
             .messageEvents
-            .addEventHandler([=](SyncBlink::Server::Message message)
+            .addEventHandler([=](SyncBlink::Server::MessageType messageType, std::vector<uint8_t> payload)
             {
-                switch(message.messageType)
+                if(messageType == SyncBlink::Server::MessageType::ANALYZER_UPDATE)
                 {
-                    case SyncBlink::Server::MessageType::ANALYZER_UPDATE:
-                        SyncBlink::AudioAnalyzerMessage analyzerMessage = message.analyzerMessage;
+                        SyncBlink::AudioAnalyzerMessage analyzerMessage;
+                        memcpy(&analyzerMessage, &payload[0], payload.size());
                         fn(analyzerMessage.volume, analyzerMessage.frequency);
-                        break;
                 }
             });
     }

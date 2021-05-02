@@ -2,6 +2,6 @@ include(FetchContent)
 FetchContent_Declare(
     syncblinkapiarduino
     GIT_REPOSITORY https://github.com/syncBlink/syncBlink
-    GIT_TAG b358d2de3b260839f81a66be584c1a342fc4f052
+    GIT_TAG 7f31b7bb2671ac3ec22e583e647d8783daaf35fb
 )
 FetchContent_Populate(syncblinkapiarduino)

@@ -7,8 +7,8 @@
 #include <RtAudio.h>
 #include <kiss_fft.h>
 #include <mappings.hpp>
+#include <shared_constants.hpp>
 #include <band_pass_filter.hpp>
-#include <frequency_infos.hpp>
 #include <event_registration.hpp>
 
 namespace SyncBlink

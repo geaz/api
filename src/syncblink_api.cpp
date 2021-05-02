@@ -5,45 +5,35 @@ namespace SyncBlink
 {
     namespace Api
     {
-        SyncBlinkApi::SyncBlinkApi(std::string url, AudioAnalyzerSource source) : websocket(url), _apiSource(source)
+        SyncBlinkApi::SyncBlinkApi(std::string url, AudioAnalyzerSource source) : _tcpClient(url), _apiSource(source)
         { 
-            websocket.messageEvents.addEventHandler(
-                [this](SyncBlink::Server::Message message) { onMessageReceived(message); });
-            websocket.connectionEvents.addEventHandler(
-                [this](bool connected) { onConnection(connected); });
+            _tcpClient.messageEvents.addEventHandler(
+                [this](Server::MessageType messageType, std::vector<uint8_t> payload) { onMessageReceived(messageType, payload); });
             _freqAnalyzer.frequencyEvents.addEventHandler(
                 [this](AudioAnalyzerMessage message) { onFrequencyCalculated(message); });
         }
 
         void SyncBlinkApi::start()
         {
-            websocket.start();
+            _freqAnalyzer.start();
+            _tcpClient.start();
         }
 
         void SyncBlinkApi::stop()
         {
             _freqAnalyzer.stop();
-            websocket.stop();
+            _tcpClient.stop();
         }
 
-        void SyncBlinkApi::onConnection(const bool connected)
+        void SyncBlinkApi::onMessageReceived(Server::MessageType messageType, std::vector<uint8_t> payload)
         {
-            if(connected) _freqAnalyzer.start();
-            else _freqAnalyzer.stop();
-        }
-
-        void SyncBlinkApi::onMessageReceived(const Server::Message message)
-        {
-            switch(message.messageType)
+            switch(messageType)
             {
-                case Server::MESH_COUNT_REQUEST:
-                    websocket.send(createAnswer(message, Client::MESH_COUNTED));
+                case Server::DISTRIBUTE_MOD:
+                    _tcpClient.send(0, 0, Client::MOD_DISTRIBUTED);
                     break;
-                case Server::MESH_UPDATE:
-                    websocket.send(createAnswer(message, Client::MESH_UPDATED));
-                    break;
-                case Server::SOURCE_UPDATE:
-                    _currentSource = message.sourceMessage.source;
+                case Server::SOURCE_UPDATE:                    
+                    _currentSource = (AudioAnalyzerSource)payload[0];
                     break;
             }
         }
@@ -51,18 +41,7 @@ namespace SyncBlink
         void SyncBlinkApi::onFrequencyCalculated(AudioAnalyzerMessage analyzerMessage)
         {
             if(_currentSource != AudioAnalyzerSource::Desktop) return;
-
-            Client::Message message = { 666, Client::EXTERNAL_ANALYZER };
-            message.audioAnalyzerMessage = analyzerMessage;
-
-            websocket.send(message); 
-        }
-
-        Client::Message SyncBlinkApi::createAnswer(const Server::Message message, const Client::MessageType answerMessageType) const
-        {
-            Client::Message answerMessage = { message.id, answerMessageType };
-            if(answerMessageType == Client::MESH_COUNTED) answerMessage.countedMessage = {0,0,0,0};
-            return answerMessage;
+            _tcpClient.send(&analyzerMessage, sizeof(analyzerMessage), Client::EXTERNAL_ANALYZER); 
         }
     }
 }
