@@ -3,6 +3,7 @@
 
 #include <event_registration.hpp>
 #include <server_messages.hpp>
+#include <shared_constants.hpp>
 #include "tcp_client.hpp"
 #include "frequency_analyzer.hpp"
 
@@ -13,19 +14,22 @@ namespace SyncBlink
         class SyncBlinkApi
         {
             public:
-                SyncBlinkApi(std::string url, AudioAnalyzerSource source);
+                SyncBlinkApi(std::string url, uint64_t analyzerId, std::string analyzerName);
                 void start();
                 void stop();
 
                 TcpClient _tcpClient;
 
             private:
+                void onConnection(bool connected);
                 void onMessageReceived(Server::MessageType messageType, std::vector<uint8_t> payload);
                 void onFrequencyCalculated(AudioAnalyzerMessage message);
 
-                AudioAnalyzerSource _apiSource;
                 FrequencyAnalyzer _freqAnalyzer;
-                AudioAnalyzerSource _currentSource = AudioAnalyzerSource::Station;
+                uint64_t _analyzerId;
+                char _analyzerName[MaxNodeLabelLength];
+                uint8_t _analyzerNameLength;
+                uint64_t _currentSource = 0;
         };
     }
 }
@@ -33,9 +37,9 @@ namespace SyncBlink
 extern "C" {
     typedef void* syncblink_api;
 
-    __declspec(dllexport) syncblink_api syncblink_api_init(const char *url, int source)
+    __declspec(dllexport) syncblink_api syncblink_api_init(const char* url, uint64_t analyzerId, const char* analyzerName)
     {
-        return new SyncBlink::Api::SyncBlinkApi(url, static_cast<SyncBlink::AudioAnalyzerSource>(source));
+        return new SyncBlink::Api::SyncBlinkApi(url, analyzerId, analyzerName);
     }
 
     __declspec(dllexport) void syncblink_api_start(syncblink_api g)

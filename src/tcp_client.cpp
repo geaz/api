@@ -1,5 +1,6 @@
 #include <iostream>
 #include <inttypes.h>
+#include <network/tcp/messages/client_messages.hpp>
 
 #include "tcp_client.hpp"
 
@@ -25,6 +26,9 @@ namespace SyncBlink
                     std::cout << "Connected!\n";
                     _connected = true;
                     startRead();
+
+                    for(auto event : connectionEvents.getEventHandlers())
+                        event.second(_connected);
                 }
             });
             _ioContext.run();

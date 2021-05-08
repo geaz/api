@@ -10,9 +10,9 @@ namespace SyncBlink.Api
         private readonly List<OnFrequencyFunction> freqCallBacks = new List<OnFrequencyFunction>();
         private readonly IntPtr _apiPtr;
 
-        public SyncBlinkApi(string url, AnalyzerSource source)
+        public SyncBlinkApi(string url, long analyzerId, string analyzerName)
         {
-            _apiPtr = Bindings.Init(url, source);
+            _apiPtr = Bindings.Init(url, analyzerId, analyzerName);
         }
 
         public void Start()
@@ -43,12 +43,6 @@ namespace SyncBlink.Api
         }
     }
 
-    public enum AnalyzerSource
-    {
-        Basis = 0,
-        Desktop = 1
-    }
-
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void OnFrequencyFunction(
         byte volume,
@@ -59,7 +53,7 @@ namespace SyncBlink.Api
         private const string DllFile = "syncblinkapi";
 
         [DllImport(DllFile, EntryPoint = "syncblink_api_init", CallingConvention = CallingConvention.Cdecl)]
-        internal extern static IntPtr Init([MarshalAs(UnmanagedType.LPStr)] string url, AnalyzerSource source);
+        internal extern static IntPtr Init([MarshalAs(UnmanagedType.LPStr)] string url, long analyzerId, [MarshalAs(UnmanagedType.LPStr)] string analyzerName);
 
         [DllImport(DllFile, EntryPoint = "syncblink_api_start", CallingConvention = CallingConvention.Cdecl)]
         internal extern static IntPtr Start(IntPtr syncBlinkApi);
