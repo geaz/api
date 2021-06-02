@@ -49,7 +49,7 @@ namespace SyncBlink
                 {
                     Server::UpdateMessage message;
                     memcpy(&message, &payload[0], payload.size());
-                    _currentSource = message.activeSource;
+                    _currentSource = message.activeAnalyzer;
                     break;
                 }
                 case Server::SOURCE_UPDATE:
