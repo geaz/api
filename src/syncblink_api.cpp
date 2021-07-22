@@ -31,7 +31,7 @@ namespace SyncBlink
         {
             if(connected) 
             {                            
-                Client::ConnectionMessage message = { false, true, _analyzerId, 0, 0, 0, 0 };
+                Client::ConnectionMessage message = { false, true, false, _analyzerId, 0, 0, 0, 0 };
                 memcpy(&message.nodeLabel[0], &_analyzerName[0], _analyzerNameLength);
 
                 _tcpClient.send(&message, sizeof(message), Client::MESH_CONNECTION);

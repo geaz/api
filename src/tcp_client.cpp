@@ -57,15 +57,9 @@ namespace SyncBlink
                 package[4] = (uint8_t)(messageSize>>16);
                 package[5] = (uint8_t)(messageSize>>8);
                 package[6] = (uint8_t)(messageSize>>0);
+                package[7] = messageType;
 
-                uint8_t checksum = 0;
-                for(uint8_t i = 0; i<7; i++)
-                {
-                    checksum += package[i] % 2;
-                }
-                package[7] = checksum;
-                package[8] = messageType;
-                if(messageSize > 0) memcpy(&package[9], message, messageSize);
+                if(messageSize > 0) memcpy(&package[8], message, messageSize);
 
                 asio::write(_socket, asio::buffer(package, packageSize));
             }
@@ -87,8 +81,8 @@ namespace SyncBlink
                         size_t readLen = asio::read(_socket, asio::buffer(magicBuf, 2));
                         if(readLen == sizeof(magicBuf) && magicBuf[0] == SocketMagicBytes[1] && magicBuf[1] == SocketMagicBytes[2])
                         {
-                            uint8_t messageHeader[6];
-                            readLen = asio::read(_socket, asio::buffer(messageHeader, 6));
+                            uint8_t messageHeader[5];
+                            readLen = asio::read(_socket, asio::buffer(messageHeader, 5));
                             if(readLen == sizeof(messageHeader))
                             {
                                 uint32_t messageSize = 
@@ -96,33 +90,20 @@ namespace SyncBlink
                                     (messageHeader[1]<<16) + 
                                     (messageHeader[2]<<8) + 
                                     messageHeader[3];
-                                uint8_t messageChecksum = messageHeader[4];
-                                uint8_t messageType = messageHeader[5];
+                                uint8_t messageType = messageHeader[4];
 
-                                uint8_t checksum = 0;
-                                checksum += SocketMagicBytes[0] % 2;                    
-                                checksum += SocketMagicBytes[1] % 2;
-                                checksum += SocketMagicBytes[2] % 2;
-                                checksum += messageHeader[0] % 2;
-                                checksum += messageHeader[1] % 2;
-                                checksum += messageHeader[2] % 2;
-                                checksum += messageHeader[3] % 2;
+                                TcpMessage tcpMessage;
+                                tcpMessage.messageType = messageType;
+                                tcpMessage.message.resize(messageSize);
 
-                                if(checksum == messageChecksum)
+                                uint32_t readBytes = 0;
+                                while(readBytes < messageSize)
                                 {
-                                    TcpMessage tcpMessage;
-                                    tcpMessage.messageType = messageType;
-                                    tcpMessage.message.resize(messageSize);
-
-                                    uint32_t readBytes = 0;
-                                    while(readBytes < messageSize)
-                                    {
-                                        readBytes += asio::read(_socket, asio::buffer(&tcpMessage.message[readBytes], messageSize-readBytes));
-                                    }
-                                    //printf("Found message - Size: %zi, Type: %i\n", tcpMessage.message.size() + SocketHeaderSize, tcpMessage.messageType);
-                                    for(auto event : messageEvents.getEventHandlers())
-                                        event.second((Server::MessageType)tcpMessage.messageType, tcpMessage.message);
+                                    readBytes += asio::read(_socket, asio::buffer(&tcpMessage.message[readBytes], messageSize-readBytes));
                                 }
+                                //printf("Found message - Size: %zi, Type: %i\n", tcpMessage.message.size() + SocketHeaderSize, tcpMessage.messageType);
+                                for(auto event : messageEvents.getEventHandlers())
+                                    event.second((Server::MessageType)tcpMessage.messageType, tcpMessage.message);
                             }
                         }
                     }
